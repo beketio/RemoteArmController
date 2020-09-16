@@ -1,0 +1,13 @@
+﻿<UserControl x:Class="ArmController.gui.AxisPreview"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ArmController.gui"
+             mc:Ignorable="d">
+    <Grid Height="110" Width="110">
+        <Ellipse Fill="#FFF4F4F5" HorizontalAlignment="Center" Height="110" Margin="0" Stroke="Black" VerticalAlignment="Center" Width="110"/>
+        <Ellipse x:Name="PositionIndicator" Fill="Red" HorizontalAlignment="Center" Height="10" Margin="0" VerticalAlignment="Center" Width="10"/>
+        <Ellipse x:Name="DeadzoneCircle" Fill="#FFAEAEAE" HorizontalAlignment="Center" Height="0" Margin="0" VerticalAlignment="Center" Width="0"/>
+    </Grid>
+</UserControl>
