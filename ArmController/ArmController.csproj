@@ -100,25 +100,24 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Communication\ICommunicator.cs" />
+    <Compile Include="Core\Communication\NetworkCommunicator.cs" />
     <Compile Include="Core\ComponentException.cs" />
     <Compile Include="Core\Controller.cs" />
     <Compile Include="Core\Arm\RobotArm.cs" />
-    <Compile Include="Core\Arm\ICommunicator.cs" />
     <Compile Include="Core\Input\GamepadBindings.cs" />
     <Compile Include="Core\Input\GamepadDevice.cs" />
     <Compile Include="Core\Input\GamepadInput.cs" />
     <Compile Include="Core\Input\GamepadInputData.cs" />
     <Compile Include="Core\Input\GamepadMovement.cs" />
     <Compile Include="Core\Input\IInputDevice.cs" />
-    <Compile Include="Core\InputData.cs" />
     <Compile Include="Core\Input\IInputDeviceStatusListener.cs" />
+    <Compile Include="Core\Input\InputData.cs" />
     <Compile Include="Core\Input\LeapMotionDevice.cs" />
     <Compile Include="Core\Input\XInputDevice.cs" />
     <Compile Include="Core\LinearUtils.cs" />
-    <Compile Include="Core\Arm\NetworkCommunicator.cs" />
     <Compile Include="Core\Arm\RotationData.cs" />
     <Compile Include="Core\Input\SteamVRDevice.cs" />
-    <Compile Include="Core\VRTest.cs" />
     <Compile Include="Core\GamepadMovement.cs" />
     <Compile Include="Gui\AxisPreview.xaml.cs">
       <DependentUpon>AxisPreview.xaml</DependentUpon>
@@ -184,12 +183,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\OpenVRApiModule\OpenVRApiModule\OpenVRApiModule.csproj">
-      <Project>{c2fe67e2-ff42-43f6-85a3-662d68fdd0d2}</Project>
-      <Name>OpenVRApiModule</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Page Include="Gui\AxisPreview.xaml">
@@ -267,6 +260,12 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenVrApiModule\OpenVrApiModule.csproj">
+      <Project>{e8a307ec-3325-4329-bbb7-72a344841511}</Project>
+      <Name>OpenVrApiModule</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -124,7 +124,7 @@ namespace ArmController.Core
 
                 Matrix<double> rotation = xMat * yMat * zMat;
 
-                valid = arm.Update(position, rotation);
+                //valid = arm.Update(position, rotation);
             }
             else
             {
