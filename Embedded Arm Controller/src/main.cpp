@@ -11,12 +11,12 @@
 const bool debug = true;
 
 //WIFI
-const char* wifi_ssid = "batcave"; //type your WIFI information inside the quotes
-const char* wifi_password = "injustice";
+const char* wifi_ssid = "ssid"; //type your WIFI information inside the quotes
+const char* wifi_password = "password";
 
 //OTA
 const char* ota_name = "Robot Arm";
-const char* ota_password = "danya101";
+const char* ota_password = "ota password";
 const int ota_port = 8266;
 
 const int udp_porty = 4210;
