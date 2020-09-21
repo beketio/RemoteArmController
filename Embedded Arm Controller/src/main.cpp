@@ -2,34 +2,98 @@
 #include <Wire.h>
 
 #include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
+//#include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
- 
-#include <Arm.h>
-#include <Udper.h>
+
+#include "Configuration.h"
+#include "Arm.h"
+#include "UdpServer.h"
 
 const bool debug = true;
 
-//WIFI
-const char* wifi_ssid = "ssid"; //type your WIFI information inside the quotes
-const char* wifi_password = "password";
+// WIFI
+const char* wifi_ssid = WIFI_SSID;
+const char* wifi_password = WIFI_PASSWORD;
 
-//OTA
-const char* ota_name = "Robot Arm";
-const char* ota_password = "ota password";
+// OTA
+const char* ota_name = OTA_NAME;
+const char* ota_password = OTA_PASSWORD;
 const int ota_port = 8266;
 
-const int udp_porty = 4210;
+void SetupWifi();
+void SetupOta();
+float FromBytes(byte* source);
 
-IPAddress ipAddress;
-WiFiClient wifiClient;
+//IPAddress ipAddress;
+//WiFiClient wifiClient;
 
 Arm arm = Arm();
-Udper udp = Udper(udp_porty, true);
+UdpServer udp = UdpServer();
 
+void setup() {
+    Serial.begin(115200);
+    Serial.println("\nBegin");
+    SetupWifi();
+    SetupOta();
+    udp.Setup(UDP_PORT);
+}
 
+void loop() {
+    if (WiFi.status() != WL_CONNECTED) {
+        delay(10);
+        Serial.print("WIFI Disconnected. Attempting reconnection.");
+        SetupWifi();
+        return;
+    }
+    ArduinoOTA.handle();
+    yield();
+    int dataSize = udp.NextPacket();
+    char* header = udp.GetHeader();
 
-/********************************** START SETUP WIFI*****************************************/
+    static unsigned long lastTime = 0;
+
+    if(dataSize && strcmp(header, "data") == 0)
+    {
+        uint8_t * data = udp.GetData();
+        int narms = data[0];
+        int ntools = data[1];
+        ArmPosition pos {};
+        pos.numArms = narms + ntools;
+        data = &data[2];
+        int actualSize = min(pos.numArms * 4, dataSize - 2);
+        int armi = 0;
+        for(int i = 0; i < actualSize; i += 4)
+            pos.arm[armi++] = FromBytes(&data[i]);
+        bool valid = arm.SetPosition(&pos);
+        unsigned long currentTime = millis();
+        // only print once per second
+        if(currentTime - lastTime > 1000)
+        {
+            if(valid)
+            {
+                Serial.print("Pos: ");
+                for(int i = 0; i < pos.numArms; i++)
+                {
+                    Serial.print(pos.arm[i]);
+                    Serial.print(", ");
+                }
+                Serial.println();
+            }
+            else
+            {
+                Serial.println("Invalid!");
+                for(int i = 0; i < pos.numArms; i++)
+                {
+                    Serial.print(pos.arm[i]);
+                    Serial.print(", ");
+                }
+            }
+            lastTime = currentTime;
+        }
+    }
+    arm.Update();
+}
+
 void SetupWifi() {
 
 	delay(10);
@@ -48,7 +112,7 @@ void SetupWifi() {
 		Serial.print(".");
 	}
 
-	ipAddress = WiFi.localIP();
+	// ipAddress = WiFi.localIP();
 
 	if (debug) {
 		Serial.println();
@@ -58,16 +122,10 @@ void SetupWifi() {
 	}
 }
 
-/********************************** START SETUP OTA*****************************************/
 void SetupOta() {
-	//OTA SETUP
 	ArduinoOTA.setPort(ota_port);
-	// Hostname defaults to esp8266-[ChipID]
 	ArduinoOTA.setHostname(ota_name);
-
-	// No authentication by default
 	ArduinoOTA.setPassword(ota_password);
-
 	ArduinoOTA.onStart([]() {
 		Serial.println("Starting");
 	});
@@ -95,75 +153,9 @@ void SetupOta() {
 	}
 }
 
-
-void setup() {
-  Serial.begin(115200);
-  Serial.println("\nBegin");
-  SetupWifi();
-  SetupOta();
-  udp.Setup();
-}
-
 float FromBytes(byte* source)
 {
-	float *fp = (float*)source;
+	float *fp = (float*) source;
 	float f = *fp;
 	return f;
-}
-
-long lastTime = 0;
-
-/********************************** START MAIN LOOP*****************************************/
-void loop() {
-	if (WiFi.status() != WL_CONNECTED) {
-		delay(10);
-		Serial.print("WIFI Disconnected. Attempting reconnection.");
-		SetupWifi();
-		return;
-	}
-	ArduinoOTA.handle();
-	yield();
-	int dataSize = udp.NextPacket();
-	char* header = udp.GetHeader();
-
-	if(dataSize && strcmp(header, "data") == 0)
-	{
-		byte* data = udp.GetData();
-		int narms = data[0];
-		int ntools = data[1];
-		ArmPosition pos;
-		pos.numArms = narms + ntools;
-		data = &data[2];
-		int actualSize = min(pos.numArms * 4, dataSize - 2);
-		int armi = 0;
-		for(int i = 0; i < actualSize; i += 4)
-		pos.arm[armi++] = FromBytes(&data[i]);
-		bool valid = arm.SetPosition(&pos);
-		long currentTime = millis();
-		//only print once per second
-		if(currentTime - lastTime > 1000)
-		{
-			if(valid)
-			{
-				Serial.print("Pos: ");
-				for(int i = 0; i < pos.numArms; i++)
-				{
-					Serial.print(pos.arm[i]);
-					Serial.print(", ");
-				}
-				Serial.println();
-			}
-			else
-			{
-				Serial.println("Invalid!");
-				for(int i = 0; i < pos.numArms; i++)
-				{
-					Serial.print(pos.arm[i]);
-					Serial.print(", ");
-				}
-			}
-		lastTime = currentTime;
-		}
-	}
-	arm.Update();
 }

@@ -2,20 +2,19 @@
 
 Arm::Arm()
 {
+    pwm = Adafruit_PWMServoDriver();
     pwm.begin();
-    pwm.setPWMFreq(FREQUENCY);
+    pwm.setPWMFreq(PWM_FREQUENCY);
     
-    ArmPosition restingPosition;
+    ArmPosition restingPosition {};
     restingPosition.numArms = 7;
     for(int i = 0; i < 7; i++)
-        restingPosition.arm[i] = resting[i];
+        restingPosition.arm[i] = (float) resting[i];
     SetPosition(&restingPosition);
 }
 
 Arm::~Arm()
-{
-    
-}
+= default;
 
 bool Arm::SetPosition(ArmPosition* position)
 {
@@ -23,7 +22,7 @@ bool Arm::SetPosition(ArmPosition* position)
         return false;
     ToPulseWidth(position);
     targetChanged = true;
-    
+    return true;
 }
 
 void Arm::Update()
@@ -40,7 +39,7 @@ bool Arm::ValidRotation(ArmPosition* position)
 {
     ArmPosition pos = *position;
     for(int i = 0; i < pos.numArms; i++)
-        if(pos.arm[i] > armMax[i] || pos.arm[i] < armMin[i])
+        if(pos.arm[i] > (float) armMax[i] || pos.arm[i] < (float) armMin[i])
             return false;
     
     int r2max = GetR2Max(pos.arm[1]);
@@ -57,8 +56,8 @@ int Arm::GetR2Max(int r1)
 
 int Arm::PulseWidth(float angle)
 {
-    float pulseWide = (angle) * (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH) / 180.0f + MIN_PULSE_WIDTH;
-    return int(pulseWide / 1000000 * FREQUENCY * 4096);
+    float pulseWide = (angle * (PULSE_WIDTH_MAX - PULSE_WIDTH_MIN) / 180.0f) + PULSE_WIDTH_MIN;
+    return int(pulseWide / 1000000 * PWM_FREQUENCY * 4096);
 }
 
 void Arm::ToPulseWidth(ArmPosition* position)
