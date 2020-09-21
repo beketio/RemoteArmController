@@ -1,43 +1,35 @@
 #pragma once
 
-#include <math.h>
-#include <Configuration.h>
-#include <DataStructs.h>
+#include <Adafruit_PWMServoDriver.h>
+#include <Structs.h>
 
-namespace
-{
 
-const double pi = 3.141592653589793;
-const double pi_2 = 1.570796326794896;
-const float pif = 3.1415927f;
-const float pi_2f = 1.5707963f;
+#define MIN_PULSE_WIDTH       650
+#define MAX_PULSE_WIDTH       2350
+#define DEFAULT_PULSE_WIDTH   1500
+#define FREQUENCY             50
 
-const ServoData minPos = {MIN_SERVO_0, MIN_SERVO_1, MIN_SERVO_2, MIN_SERVO_3, MIN_SERVO_4,
-                          MIN_SERVO_5, MIN_SERVO_6, MIN_SERVO_7, MIN_SERVO_8, MIN_SERVO_9};
-const ServoData maxPos = {MAX_SERVO_0, MAX_SERVO_1, MAX_SERVO_2, MAX_SERVO_3, MAX_SERVO_4,
-                          MAX_SERVO_5, MAX_SERVO_6, MAX_SERVO_7, MAX_SERVO_8, MAX_SERVO_9};
+static const int armMin[] = {0, 45, 10, 0, 0, 0, 0};
+static const int armMax[] = {180, 170, 140, 180, 180, 180, 97};
+static const int resting[] = { 90, 160, 10, 90, 90, 90, 0 };
 
-const float armLength0 = ARM_LENGTH_0;
-const float armLength1 = ARM_LENGTH_1;
-const float armLength2 = ARM_LENGTH_2;
+class Arm {
+    public:
+    Arm();
+    ~Arm();
 
-class Arm
-{
+    bool SetPosition(ArmPosition* position);
+    void Update();
 
-public:
-    void update(PositionData position);
-    PositionData currentPosition();
-    RotationData currentRotation();
-    ServoData currentServo();
+    private:
+    bool ValidRotation(ArmPosition* position);
+    int GetR2Max(int r1);
+    int PulseWidth(float angle);
+    void ToPulseWidth(ArmPosition* position);
 
-private:
-    void translatePosition(PositionData *position);
-    void transformRotation(RotationData *rotation);
+    Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+    ArmPosition targetPosition;
+    PwmData servoPosition;
+    bool targetChanged = false;
 
-    RotationData positionToRotation(PositionData position);
-    ServoData rotationToServo(RotationData rotation);
-
-    double lawOfCosines(double a, double b, double c);
 };
-
-} // namespace

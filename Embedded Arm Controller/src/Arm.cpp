@@ -1,69 +1,69 @@
 #include <Arm.h>
 
-void Arm::update(PositionData position)
+Arm::Arm()
 {
-    RotationData rotation = positionToRotation(position);
+    pwm.begin();
+    pwm.setPWMFreq(FREQUENCY);
+    
+    ArmPosition restingPosition;
+    restingPosition.numArms = 7;
+    for(int i = 0; i < 7; i++)
+        restingPosition.arm[i] = resting[i];
+    SetPosition(&restingPosition);
 }
 
-RotationData Arm::positionToRotation(PositionData position)
+Arm::~Arm()
 {
-    translatePosition(&position);
-
-    RotationData rotation;
-
-    double xyDistance = hypot(position.xpos, position.ypos);
-    double baseDistance = hypot(position.zpos, xyDistance);
-
-    if (position.xpos == 0 && position.ypos == 0)
-        rotation.r0 = 0;
-    else
-        rotation.r0 = atan2(position.xpos, position.ypos); // atan(x/y) measure angle from +y axis
-    rotation.r1 = lawOfCosines(armLength0, baseDistance, armLength1);
-    rotation.r2 = lawOfCosines(armLength0, armLength1, baseDistance);
-
-    float xrot = position.xrot + pi - (rotation.r1 + rotation.r2);
-    float yrot = position.yrot;
-    float zrot = -position.zrot;
-
-    double func = cos(xrot) * sin(zrot);
-    double divpos = asin(func / (1 + func));
-    double divneg = asin(func / (1 - func));
-    rotation.r3 = (divpos + divneg) / 2;
-    rotation.r4 = asin(cos(zrot) * sin(xrot));
-    rotation.r5 = (divpos - divneg) / 2;
+    
 }
 
-ServoData Arm::rotationToServo(RotationData rotation)
+bool Arm::SetPosition(ArmPosition* position)
 {
+    if(!ValidRotation(position))
+        return false;
+    ToPulseWidth(position);
+    targetChanged = true;
+    
 }
 
-void Arm::translatePosition(PositionData *position)
+void Arm::Update()
 {
-    PositionData pos = *position;
-
-    double xOffset = armLength2;
-    xOffset *= cos(pos.xrot);
-    xOffset *= sin(pos.zrot);
-
-    double yOffset = armLength2;
-    xOffset *= cos(pos.xrot);
-    xOffset *= cos(pos.zrot);
-
-    double zOffset = armLength2;
-    xOffset *= sin(pos.xrot);
-    xOffset *= cos(pos.zrot);
-
-    pos.xpos += (float)xOffset;
-    pos.ypos += (float)yOffset;
-    pos.zpos += (float)zOffset;
+    if(targetChanged)
+    {
+        for(int i = 0; i < servoPosition.numServos; i++)
+            pwm.setPWM(i, 0, servoPosition.servo[i]);
+        targetChanged = false;
+    }
 }
 
-void Arm::transformRotation(RotationData *rotation)
+bool Arm::ValidRotation(ArmPosition* position)
 {
-    RotationData rot = *rotation;
+    ArmPosition pos = *position;
+    for(int i = 0; i < pos.numArms; i++)
+        if(pos.arm[i] > armMax[i] || pos.arm[i] < armMin[i])
+            return false;
+    
+    int r2max = GetR2Max(pos.arm[1]);
+    if(pos.arm[2] > r2max)
+        return false;
+    
+    return true;
 }
 
-double Arm::lawOfCosines(double a, double b, double c)
+int Arm::GetR2Max(int r1)
 {
-    return acos((a * a + b * b - c * c) / 2 * a * b);
+    return 180 - r1;
+}
+
+int Arm::PulseWidth(float angle)
+{
+    float pulseWide = (angle) * (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH) / 180.0f + MIN_PULSE_WIDTH;
+    return int(pulseWide / 1000000 * FREQUENCY * 4096);
+}
+
+void Arm::ToPulseWidth(ArmPosition* position)
+{
+    servoPosition.numServos = position->numArms;
+    for(int i = 0; i < position-> numArms; i++)
+        servoPosition.servo[i] = PulseWidth(position->arm[i]);
 }
