@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Adafruit_PWMServoDriver.h>
-#include "Configuration.h"
-#include "Structs.h"
+#include "configuration.h"
+#include "arm_structs.h"
 
 #define PULSE_WIDTH_MIN       650
 #define PULSE_WIDTH_MAX       2350
@@ -20,10 +20,10 @@ static const int resting[] = { SERVO_0_REST, SERVO_1_REST, SERVO_2_REST,
                                SERVO_3_REST, SERVO_4_REST, SERVO_5_REST,
                                SERVO_6_REST };
 
-class Arm {
+class robot_arm {
     public:
-    Arm();
-    ~Arm();
+    robot_arm();
+    ~robot_arm();
 
     bool SetPosition(ArmPosition* position);
     void Update();

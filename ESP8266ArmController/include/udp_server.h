@@ -28,9 +28,9 @@ char *GetHeader();
 uint8_t *GetData();
 
 private:
-WiFiUDP udpClient;
+WiFiUDP udp_client;
 char header[header_size + 1]{};
-uint8_t udpPacket[udp_packet_buffer_size]{};
-uint8_t lastPacketNum = 0xFF;
+uint8_t udp_packet[udp_packet_buffer_size]{};
+uint8_t last_packet_num = 0xFF;
 
 };

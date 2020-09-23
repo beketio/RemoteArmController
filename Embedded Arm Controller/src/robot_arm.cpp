@@ -1,6 +1,6 @@
-#include <Arm.h>
+#include <robot_arm.h>
 
-Arm::Arm()
+robot_arm::robot_arm()
 {
     pwm = Adafruit_PWMServoDriver();
     pwm.begin();
@@ -13,10 +13,10 @@ Arm::Arm()
     SetPosition(&restingPosition);
 }
 
-Arm::~Arm()
+robot_arm::~robot_arm()
 = default;
 
-bool Arm::SetPosition(ArmPosition* position)
+bool robot_arm::SetPosition(ArmPosition* position)
 {
     if(!ValidRotation(position))
         return false;
@@ -25,7 +25,7 @@ bool Arm::SetPosition(ArmPosition* position)
     return true;
 }
 
-void Arm::Update()
+void robot_arm::Update()
 {
     if(targetChanged)
     {
@@ -35,7 +35,7 @@ void Arm::Update()
     }
 }
 
-bool Arm::ValidRotation(ArmPosition* position)
+bool robot_arm::ValidRotation(ArmPosition* position)
 {
     ArmPosition pos = *position;
     for(int i = 0; i < pos.numArms; i++)
@@ -49,18 +49,18 @@ bool Arm::ValidRotation(ArmPosition* position)
     return true;
 }
 
-int Arm::GetR2Max(int r1)
+int robot_arm::GetR2Max(int r1)
 {
     return 180 - r1;
 }
 
-int Arm::PulseWidth(float angle)
+int robot_arm::PulseWidth(float angle)
 {
     float pulseWide = (angle * (PULSE_WIDTH_MAX - PULSE_WIDTH_MIN) / 180.0f) + PULSE_WIDTH_MIN;
     return int(pulseWide / 1000000 * PWM_FREQUENCY * 4096);
 }
 
-void Arm::ToPulseWidth(ArmPosition* position)
+void robot_arm::ToPulseWidth(ArmPosition* position)
 {
     servoPosition.numServos = position->numArms;
     for(int i = 0; i < position-> numArms; i++)
