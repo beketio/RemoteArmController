@@ -42,7 +42,12 @@ namespace ArmController.Core.Input
 
             // Get the controller index
             controllerIndex = (int)vrSystem.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.RightHand);
+            Console.WriteLine("Controller Index: " + controllerIndex);
+            if (controllerIndex < 0)
+                throw new ComponentException("Controller not found");
+
             statusListener?.Invoke(true, "SteamVR connected.");
+            connected = true;
             return true;
         }
 
@@ -70,14 +75,16 @@ namespace ArmController.Core.Input
                 // Update if valid controller index
                 if (controllerIndex >= 0)
                     vrSystem.GetControllerStateWithPose(ETrackingUniverseOrigin.TrackingUniverseSeated, (uint)controllerIndex, ref state, 0, ref pose);
+                else
+                    return data;
 
                 VREvent_t vrEvent = default;
 
-                while (vrSystem.PollNextEvent(ref vrEvent, 0))
+                /*while (vrSystem.PollNextEvent(ref vrEvent, 0))
                 {
                     if (vrEvent.trackedDeviceIndex == controllerIndex && vrEvent.eventType == (uint)EVREventType.VREvent_ButtonPress)
                         Console.WriteLine("Button: " + vrEvent.data.controller.button);
-                }
+                }*/
 
                 // Get Position
                 data.Position = LinearUtils.ToPosition(pose.mDeviceToAbsoluteTracking);
@@ -88,6 +95,8 @@ namespace ArmController.Core.Input
 
                 // Get Tools
                 data.Tool0 = state.rAxis3.x;
+
+                Console.WriteLine("pos: " + data.Position);
             }
 
             return data;

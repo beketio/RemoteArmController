@@ -1,6 +1,8 @@
 # RemoteArmController
 Software to control a servo powered robot arm from a desktop application. It's designed for the [SainSmart 6-Axis Desktop Robotic Arm](https://www.sainsmart.com/products/6-axis-desktop-robotic-arm-assembled) but it should be usable with any other 6 axis servo powered arm by tweaking the arm length and degree of motion parameters. The board used is an ESP8266.
 
+[Watch the video demo!](https://www.youtube.com/watch?v=ORoi-Ku_lN4)
+
 ## Desktop Application
 
 
