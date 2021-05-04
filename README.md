@@ -3,6 +3,9 @@ Software to control a servo powered robot arm from a desktop application. It's d
 
 [Watch the video demo!](https://www.youtube.com/watch?v=ORoi-Ku_lN4)
 
+[![Demo](https://img.youtube.com/vi/ORoi-Ku_lN4/0.jpg)](http://www.youtube.com/watch?v=ORoi-Ku_lN4)
+
+
 ## Desktop Application
 
 
